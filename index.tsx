@@ -32,20 +32,19 @@ interface ICallDelete {
 }
 
 function getCurrentUserId(): string | null {
-    return UserStore.getCurrentUser()?.id ?? null;
+     const userId = UserStore.getCurrentUser()?.id;
+    if (!userId)
+        throw new Error("UserStore is not ready yet");
+    return userId;
 }
 
 function getWhitelist(): string[] {
     const userId = getCurrentUserId();
-    if (!userId)
-        return [];
     return Settings.plugins[PLUGIN_ID]?.whitelists?.[userId] ?? [];
 }
 
 function saveWhitelist(list: string[]) {
     const userId = getCurrentUserId();
-    if (!userId)
-        return;
     Settings.plugins[PLUGIN_ID] = Settings.plugins[PLUGIN_ID] ?? {};
     Settings.plugins[PLUGIN_ID].whitelists = Settings.plugins[PLUGIN_ID].whitelists ?? {};
     Settings.plugins[PLUGIN_ID].whitelists[userId] = list;
