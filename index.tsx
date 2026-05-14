@@ -31,12 +31,23 @@ interface ICallDelete {
     channelId: string;
 }
 
-function getWhitelist(): string[] {
-    return Settings.plugins[PLUGIN_ID]?.whitelist ?? [];
+function getCurrentUserId(): string | null {
+     const userId = UserStore.getCurrentUser()?.id;
+    if (!userId)
+        throw new Error("UserStore is not ready yet");
+    return userId;
 }
+
+function getWhitelist(): string[] {
+    const userId = getCurrentUserId();
+    return Settings.plugins[PLUGIN_ID]?.whitelists?.[userId] ?? [];
+}
+
 function saveWhitelist(list: string[]) {
+    const userId = getCurrentUserId();
     Settings.plugins[PLUGIN_ID] = Settings.plugins[PLUGIN_ID] ?? {};
-    Settings.plugins[PLUGIN_ID].whitelist = list;
+    Settings.plugins[PLUGIN_ID].whitelists = Settings.plugins[PLUGIN_ID].whitelists ?? {};
+    Settings.plugins[PLUGIN_ID].whitelists[userId] = list;
 }
 
 const userContextPatch: NavContextMenuPatchCallback = (children, { user }: { user?: User, onClose(): void; }) => {
